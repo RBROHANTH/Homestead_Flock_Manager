@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flock Register — Homestead Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#F7F3EC;--warm:#EDE5D8;--earth:#8B6F47;--earth-dk:#5C4730;--earth-lt:#C4A882;
+  --green:#4A6741;--green-lt:#7A9B6F;--green-pale:#E8F0E6;
+  --rust:#B8521A;--rust-lt:#F0D5C4;
+  --gold:#C9922A;--gold-lt:#F5E8CE;
+  --sky:#2E6B9E;--sky-lt:#D6E9F8;
+  --plum:#6B3FA0;--plum-lt:#EDE5F8;
+  --text:#2C1F0F;--text-mid:#6B5240;--text-soft:#A08878;
+  --border:rgba(139,111,71,0.18);--border-md:rgba(139,111,71,0.32);
+  --shadow:0 2px 14px rgba(44,31,15,0.07);--shadow-lg:0 8px 36px rgba(44,31,15,0.13);
+  --radius:14px;--radius-lg:20px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);min-height:100vh;font-size:14px}
+
+/* ─── HEADER ─── */
+.site-header{position:relative;width:100%;height:260px;overflow:hidden;background:#3a2a18;cursor:pointer}
+.header-img{width:100%;height:100%;object-fit:cover;opacity:0.72;transition:opacity .3s}
+.header-bg{position:absolute;inset:0;background:linear-gradient(135deg,#3a2a18 0%,#6b4e2a 50%,#3d2e15 100%)}
+.header-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(20,10,0,.25) 0%,rgba(20,10,0,.62) 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem}
+.header-title{font-family:'Playfair Display',serif;font-size:40px;font-weight:600;color:#fff;letter-spacing:-.5px;text-shadow:0 2px 12px rgba(0,0,0,.4);margin-bottom:5px}
+.header-sub{font-size:12px;color:rgba(255,255,255,.7);letter-spacing:.1em;text-transform:uppercase;font-weight:300}
+.header-cam{position:absolute;bottom:12px;right:14px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.32);color:#fff;font-size:11px;font-family:'DM Sans',sans-serif;padding:5px 13px;border-radius:20px;cursor:pointer;backdrop-filter:blur(4px);letter-spacing:.05em;transition:background .2s}
+.header-cam:hover{background:rgba(255,255,255,.25)}
+.hidden{display:none!important}
+
+/* ─── LAYOUT ─── */
+.app{max-width:820px;margin:0 auto;padding:1.6rem 1.4rem 5rem}
+
+/* ─── TABS ─── */
+.tab-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-bottom:1.8rem}
+.tab-scroll::-webkit-scrollbar{display:none}
+.tab-bar{display:flex;gap:3px;background:var(--warm);border-radius:13px;padding:5px;border:1px solid var(--border);min-width:max-content}
+.tab{padding:7px 14px;border:none;border-radius:9px;background:transparent;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:400;color:var(--text-mid);transition:all .2s;white-space:nowrap}
+.tab:hover{background:rgba(139,111,71,.1);color:var(--text)}
+.tab.active{background:#fff;color:var(--earth-dk);font-weight:500;box-shadow:var(--shadow)}
+
+/* ─── SECTIONS ─── */
+.section{display:none;animation:fadeUp .28s ease}
+.section.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+/* ─── SECTION HEADER ─── */
+.sec-head{margin-bottom:1.4rem}
+.sec-head h2{font-family:'Playfair Display',serif;font-size:22px;font-weight:400;color:var(--earth-dk)}
+.sec-head p{font-size:12.5px;color:var(--text-soft);margin-top:3px}
+
+/* ─── METRICS ─── */
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:11px;margin-bottom:1.5rem}
+.metric{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:15px 16px;position:relative;overflow:hidden}
+.metric::after{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.metric.m-egg::after{background:var(--green)}.metric.m-hen::after{background:var(--gold)}
+.metric.m-loss::after{background:var(--rust)}.metric.m-chick::after{background:var(--earth-lt)}
+.metric.m-feed::after{background:var(--sky)}.metric.m-sales::after{background:var(--plum)}
+.m-icon{font-size:18px;margin-bottom:7px}
+.m-val{font-family:'Playfair Display',serif;font-size:26px;color:var(--text)}
+.m-label{font-size:11px;color:var(--text-soft);margin-top:2px}
+.m-sub{font-size:10.5px;color:var(--text-soft);margin-top:2px}
+
+/* ─── CARDS ─── */
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.3rem 1.5rem;margin-bottom:1.2rem;box-shadow:var(--shadow)}
+.card-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:400;color:var(--earth-dk);margin-bottom:1rem;display:flex;align-items:center;gap:7px}
+.card-title .ico{font-size:17px}
+
+/* ─── FORMS ─── */
+.fg{margin-bottom:.9rem}
+.fl{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-soft);font-weight:500;margin-bottom:4px;display:block}
+.fi,.fs{width:100%;padding:8px 12px;border:1px solid var(--border-md);border-radius:10px;background:var(--cream);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13.5px;outline:none;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;appearance:none}
+.fi:focus,.fs:focus{border-color:var(--earth);box-shadow:0 0 0 3px rgba(139,111,71,.11)}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.fr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px}
+@media(max-width:520px){.fr,.fr3{grid-template-columns:1fr}}
+
+/* ─── BUTTONS ─── */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 18px;border-radius:10px;border:1px solid var(--border-md);background:transparent;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--text-mid);transition:all .2s}
+.btn:hover{background:var(--warm);color:var(--text)}
+.btn-earth{background:var(--earth);color:#fff;border-color:var(--earth-dk)}.btn-earth:hover{background:var(--earth-dk)}
+.btn-green{background:var(--green);color:#fff;border-color:var(--green)}.btn-green:hover{background:var(--green-lt);border-color:var(--green-lt)}
+.btn-rust{background:var(--rust-lt);color:var(--rust);border-color:rgba(184,82,26,.3)}.btn-rust:hover{background:var(--rust);color:#fff}
+.btn-sky{background:var(--sky-lt);color:var(--sky);border-color:rgba(46,107,158,.3)}.btn-sky:hover{background:var(--sky);color:#fff}
+.btn-plum{background:var(--plum-lt);color:var(--plum);border-color:rgba(107,63,160,.3)}.btn-plum:hover{background:var(--plum);color:#fff}
+.btn-gold{background:var(--gold-lt);color:#7a5a10;border-color:rgba(201,146,42,.3)}.btn-gold:hover{background:var(--gold);color:#fff}
+.btn-sm{padding:5px 12px;font-size:12px;border-radius:8px}
+.btn-xs{padding:3px 9px;font-size:11px;border-radius:6px}
+
+/* ─── BADGES ─── */
+.badge{display:inline-block;padding:3px 9px;border-radius:9px;font-size:11px;font-weight:500;white-space:nowrap}
+.bg-green{background:var(--green-pale);color:var(--green)}
+.bg-rust{background:var(--rust-lt);color:var(--rust)}
+.bg-gold{background:var(--gold-lt);color:#7a5a10}
+.bg-earth{background:var(--warm);color:var(--earth-dk)}
+.bg-sky{background:var(--sky-lt);color:var(--sky)}
+.bg-plum{background:var(--plum-lt);color:var(--plum)}
+
+/* ─── LOG ROWS ─── */
+.log-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px;gap:8px;flex-wrap:wrap}
+.log-row:last-child{border-bottom:none}
+.log-main{flex:1;min-width:120px;color:var(--text)}
+.log-meta{font-size:11px;color:var(--text-soft)}
+
+/* ─── HEN/ROOSTER GRIDS ─── */
+.bird-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:13px;margin-bottom:1.2rem}
+.bird-card{background:var(--cream);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:box-shadow .2s,transform .2s;position:relative}
+.bird-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px)}
+.bird-photo{width:100%;height:140px;background:var(--warm);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;cursor:pointer}
+.bird-photo img{width:100%;height:100%;object-fit:cover}
+.bird-photo-ph{display:flex;flex-direction:column;align-items:center;gap:5px;color:var(--text-soft);font-size:11.5px}
+.bird-photo-ph .ph-ico{font-size:28px;opacity:.45}
+.photo-hover{position:absolute;inset:0;background:rgba(44,31,15,.42);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;color:#fff;font-size:11.5px;font-weight:500;letter-spacing:.04em}
+.bird-photo:hover .photo-hover{opacity:1}
+.bird-body{padding:11px 13px}
+.bird-name{font-weight:500;font-size:13.5px;margin-bottom:2px}
+.bird-id{font-size:10.5px;color:var(--text-soft);font-family:'DM Sans',sans-serif;letter-spacing:.04em;margin-bottom:5px;background:var(--warm);display:inline-block;padding:1px 7px;border-radius:6px}
+.bird-stats{font-size:11.5px;color:var(--text-soft);margin-bottom:7px}
+.bird-bar{height:4px;background:var(--warm);border-radius:2px}
+.bird-bar-fill{height:100%;border-radius:2px;background:var(--green);transition:width .5s}
+.bird-status{display:inline-block;margin-top:7px;padding:2px 8px;border-radius:8px;font-size:10.5px;font-weight:500;background:var(--green-pale);color:var(--green)}
+
+/* ─── DIVIDER ─── */
+.divider{height:1px;background:var(--border);margin:1.1rem 0}
+
+/* ─── TIP ─── */
+.tip{background:var(--gold-lt);border:1px solid rgba(201,146,42,.28);border-radius:11px;padding:11px 15px;font-size:12.5px;color:#7a5a10;margin-bottom:1.2rem;display:flex;gap:9px;align-items:flex-start;line-height:1.6}
+
+/* ─── PROGRESS ─── */
+.prog-track{height:8px;background:var(--warm);border-radius:4px;margin:5px 0 2px}
+.prog-fill{height:100%;border-radius:4px;background:var(--green);transition:width .6s ease}
+
+/* ─── FEED ITEMS ─── */
+.feed-item{background:var(--cream);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.feed-name{font-weight:500;font-size:13.5px}
+.feed-meta{font-size:12px;color:var(--text-soft)}
+
+/* ─── CHICK ID DISPLAY ─── */
+.chick-id{font-family:'DM Sans',monospace;font-size:11px;background:var(--warm);border-radius:6px;padding:2px 8px;color:var(--earth-dk);letter-spacing:.04em;border:1px solid var(--border)}
+
+/* ─── BATCH CARD ─── */
+.batch-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px}
+.batch-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.batch-title{font-weight:500;font-size:14px}
+.batch-meta{font-size:11.5px;color:var(--text-soft);margin-top:2px}
+.chick-roster{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+
+/* ─── PROTECTION CARDS ─── */
+.prot-card{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:12px}
+.prot-head{padding:13px 16px;display:flex;align-items:center;gap:9px}
+.prot-head h3{font-size:14.5px;font-weight:500;flex:1}
+.prot-body{padding:0 16px 13px;font-size:13px;color:var(--text-mid);line-height:1.9}
+.prot-body li{list-style:none;padding-left:15px;position:relative;margin-bottom:4px}
+.prot-body li::before{content:'·';position:absolute;left:0;color:var(--earth-lt)}
+
+/* ─── SALE RECORD ─── */
+.sale-row{background:var(--cream);border:1px solid var(--border);border-radius:11px;padding:11px 14px;margin-bottom:9px}
+.sale-ids{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+
+/* ─── EMPTY ─── */
+.empty{text-align:center;padding:2rem 1rem;color:var(--text-soft);font-size:13px}
+.empty-ico{font-size:32px;margin-bottom:7px;opacity:.35}
+
+/* ─── MODAL / PROMOTE ─── */
+.modal-backdrop{position:fixed;inset:0;background:rgba(44,31,15,.45);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem}
+.modal{background:#fff;border-radius:var(--radius-lg);padding:1.6rem;width:100%;max-width:420px;box-shadow:var(--shadow-lg)}
+.modal h3{font-family:'Playfair Display',serif;font-size:18px;margin-bottom:1rem;color:var(--earth-dk)}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:1.2rem}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--earth-lt);border-radius:3px}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="site-header" onclick="document.getElementById('hdr-inp').click()">
+  <div class="header-bg" id="hdr-bg"></div>
+  <img id="hdr-img" class="header-img hidden" alt="">
+  <div class="header-overlay">
+    <div class="header-title">🐓 Flock Register</div>
+    <div class="header-sub">Homestead Management · Bred with care</div>
+  </div>
+  <button class="header-cam" onclick="event.stopPropagation();document.getElementById('hdr-inp').click()">✦ Change header photo</button>
+</div>
+<input type="file" id="hdr-inp" class="hidden" accept="image/*" onchange="setHeaderPhoto(this)">
+
+<div class="app">
+
+<!-- TABS -->
+<div class="tab-scroll">
+  <div class="tab-bar">
+    <button class="tab active"  onclick="switchTab('dashboard')">Dashboard</button>
+    <button class="tab" onclick="switchTab('breeders')">Breeders</button>
+    <button class="tab" onclick="switchTab('eggs')">Eggs</button>
+    <button class="tab" onclick="switchTab('chicks')">Chicks</button>
+    <button class="tab" onclick="switchTab('sales')">Sales</button>
+    <button class="tab" onclick="switchTab('feed')">Feed</button>
+    <button class="tab" onclick="switchTab('losses')">Losses</button>
+    <button class="tab" onclick="switchTab('protection')">Protection</button>
+  </div>
+</div>
+
+<!-- ══════════════ DASHBOARD ══════════════ -->
+<div id="dashboard" class="section active">
+  <div class="sec-head">
+    <h2>Today's overview</h2>
+    <p id="dash-date"></p>
+  </div>
+  <div class="metric-grid" id="metrics"></div>
+  <div class="card">
+    <div class="card-title"><span class="ico">📈</span> Flock health</div>
+    <div id="flock-health"></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="ico">📋</span> Recent activity</div>
+    <div id="activity-log"></div>
+  </div>
+</div>
+
+<!-- ══════════════ BREEDERS ══════════════ -->
+<div id="breeders" class="section">
+  <div class="sec-head">
+    <h2>Breeders — hens &amp; roosters</h2>
+    <p>Each breeder has a unique breeder ID. Tap any photo to change it.</p>
+  </div>
+
+  <!-- ROOSTERS -->
+  <div class="card">
+    <div class="card-title"><span class="ico">🐓</span> Roosters</div>
+    <div class="bird-grid" id="rooster-list"></div>
+    <div class="divider"></div>
+    <div style="margin-top:.2rem">
+      <p class="fl" style="margin-bottom:.6rem">Add a rooster</p>
+      <div class="fr3">
+        <div class="fg"><label class="fl">Breeder ID</label><input class="fi" id="r-bid" placeholder="e.g. R01"></div>
+        <div class="fg"><label class="fl">Name</label><input class="fi" id="r-name" placeholder="e.g. Rex"></div>
+        <div class="fg"><label class="fl">Breed</label><input class="fi" id="r-breed" placeholder="optional"></div>
+      </div>
+      <button class="btn btn-earth" onclick="addRooster()">+ Add rooster</button>
+    </div>
+  </div>
+
+  <!-- HENS -->
+  <div class="card">
+    <div class="card-title"><span class="ico">🐔</span> Breeder hens</div>
+    <div class="bird-grid" id="hen-list"></div>
+    <div class="divider"></div>
+    <div style="margin-top:.2rem">
+      <p class="fl" style="margin-bottom:.6rem">Add a hen</p>
+      <div class="fr3">
+        <div class="fg"><label class="fl">Breeder ID</label><input class="fi" id="h-bid" placeholder="e.g. H01"></div>
+        <div class="fg"><label class="fl">Name</label><input class="fi" id="h-name" placeholder="e.g. Goldie"></div>
+        <div class="fg"><label class="fl">Breed</label><input class="fi" id="h-breed" placeholder="optional"></div>
+      </div>
+      <button class="btn btn-earth" onclick="addHen()">+ Add hen</button>
+    </div>
+  </div>
+  <div id="bird-file-inputs"></div>
+</div>
+
+<!-- ══════════════ EGGS ══════════════ -->
+<div id="eggs" class="section">
+  <div class="sec-head"><h2>Egg log</h2><p>Track every clutch per hen</p></div>
+  <div class="tip"><span>🥚</span><span>Annual potential: <strong id="potential-eggs">—</strong>. Log each collection to see which hen is your top producer.</span></div>
+  <div class="card">
+    <div class="card-title"><span class="ico">✏️</span> Log a collection</div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="egg-date"></div>
+      <div class="fg"><label class="fl">Hen</label><select class="fs" id="egg-hen"></select></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Eggs collected</label><input class="fi" type="number" id="egg-count" min="1" max="25" value="1"></div>
+      <div class="fg"><label class="fl">Purpose</label>
+        <select class="fs" id="egg-purpose">
+          <option value="hatching">For hatching</option>
+          <option value="eating">For eating</option>
+          <option value="selling">For selling</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-green" onclick="logEgg()">Save →</button>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="ico">📜</span> History</div>
+    <div id="egg-log-list"></div>
+  </div>
+</div>
+
+<!-- ══════════════ CHICKS ══════════════ -->
+<div id="chicks" class="section">
+  <div class="sec-head"><h2>Chick batches</h2><p>Each chick gets a unique ID based on parents + batch + roll number</p></div>
+  <div class="card">
+    <div class="card-title"><span class="ico">🐣</span> Add a new batch</div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Hatch date</label><input class="fi" type="date" id="ck-date"></div>
+      <div class="fg"><label class="fl">Batch ID / label</label><input class="fi" id="ck-bid" placeholder="e.g. B01"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Rooster (father)</label><select class="fs" id="ck-rooster"></select></div>
+      <div class="fg"><label class="fl">Hen (mother)</label><select class="fs" id="ck-hen"></select></div>
+    </div>
+    <div class="fg" style="max-width:180px"><label class="fl">Chicks hatched</label><input class="fi" type="number" id="ck-count" min="1" max="20" value="8"></div>
+    <div class="tip" style="margin-top:.5rem"><span>ℹ️</span><span>IDs will be auto-generated as <strong>[RoosterID]-[HenID]-[BatchID]-[1..n]</strong></span></div>
+    <button class="btn btn-earth" onclick="addBatch()">Create batch →</button>
+  </div>
+
+  <div id="batch-list"></div>
+
+  <div class="card" style="background:var(--cream)">
+    <div class="card-title"><span class="ico">📅</span> Growth stages</div>
+    <div style="display:grid;gap:8px">
+      <div style="display:flex;gap:10px;align-items:center;font-size:13px"><span style="min-width:75px;color:var(--text-soft)">0–4 wks</span><span class="badge bg-earth">Brooder / under hen</span></div>
+      <div style="display:flex;gap:10px;align-items:center;font-size:13px"><span style="min-width:75px;color:var(--text-soft)">4–8 wks</span><span class="badge bg-gold">Young chick</span></div>
+      <div style="display:flex;gap:10px;align-items:center;font-size:13px"><span style="min-width:75px;color:var(--text-soft)">8–16 wks</span><span class="badge bg-rust">Pullet / cockerel</span></div>
+      <div style="display:flex;gap:10px;align-items:center;font-size:13px"><span style="min-width:75px;color:var(--text-soft)">16–20 wks</span><span class="badge bg-green">Near laying age</span></div>
+      <div style="display:flex;gap:10px;align-items:center;font-size:13px"><span style="min-width:75px;color:var(--text-soft)">20+ wks</span><span class="badge bg-green">Adult — ready</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ SALES ══════════════ -->
+<div id="sales" class="section">
+  <div class="sec-head"><h2>Sales log</h2><p>Record sales using chick IDs — counts adjust automatically</p></div>
+  <div class="card">
+    <div class="card-title"><span class="ico">💰</span> Record a sale</div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="sale-date"></div>
+      <div class="fg"><label class="fl">Buyer name (optional)</label><input class="fi" id="sale-buyer" placeholder="e.g. Rajan"></div>
+    </div>
+    <div class="fg"><label class="fl">Chick IDs sold <span style="font-weight:300;text-transform:none">(comma-separated)</span></label>
+      <input class="fi" id="sale-ids" placeholder="e.g. R01-H01-B01-1, R01-H01-B01-2"></div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Price per bird (₹)</label><input class="fi" type="number" id="sale-price" min="0" value="150"></div>
+      <div class="fg"><label class="fl">Notes</label><input class="fi" id="sale-notes" placeholder="optional"></div>
+    </div>
+    <button class="btn btn-plum" onclick="logSale()">Record sale →</button>
+    <div id="sale-error" style="margin-top:8px;font-size:12.5px;color:var(--rust);display:none"></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="ico">📊</span> Sales summary</div>
+    <div id="sales-summary"></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="ico">📜</span> Sale records</div>
+    <div id="sale-records"></div>
+  </div>
+</div>
+
+<!-- ══════════════ FEED ══════════════ -->
+<div id="feed" class="section">
+  <div class="sec-head"><h2>Feed management</h2><p>Track types, costs, and daily usage across your flock</p></div>
+
+  <!-- Feed types -->
+  <div class="card">
+    <div class="card-title"><span class="ico">🌾</span> Feed types</div>
+    <div id="feed-type-list"></div>
+    <div class="divider"></div>
+    <p class="fl" style="margin-bottom:.6rem">Add a feed type</p>
+    <div class="fr3">
+      <div class="fg"><label class="fl">Feed name</label><input class="fi" id="ft-name" placeholder="e.g. Layer Mash"></div>
+      <div class="fg"><label class="fl">Cost per kg (₹)</label><input class="fi" type="number" id="ft-cost" min="0" step="0.5" value="40"></div>
+      <div class="fg"><label class="fl">Unit</label>
+        <select class="fs" id="ft-unit">
+          <option value="kg">kg</option>
+          <option value="g">grams</option>
+          <option value="litre">litre</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-sky" onclick="addFeedType()">+ Add feed type</button>
+  </div>
+
+  <!-- Log daily usage -->
+  <div class="card">
+    <div class="card-title"><span class="ico">📝</span> Log daily usage</div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="fu-date"></div>
+      <div class="fg"><label class="fl">Feed type</label><select class="fs" id="fu-type"></select></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Quantity used</label><input class="fi" type="number" id="fu-qty" min="0" step="0.1" value="1"></div>
+      <div class="fg"><label class="fl">Notes</label><input class="fi" id="fu-notes" placeholder="e.g. morning + evening"></div>
+    </div>
+    <button class="btn btn-green" onclick="logFeedUsage()">Log usage →</button>
+  </div>
+
+  <!-- Feed summary -->
+  <div class="card">
+    <div class="card-title"><span class="ico">📊</span> Usage summary</div>
+    <div id="feed-summary"></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="ico">📜</span> Usage log</div>
+    <div id="feed-log"></div>
+  </div>
+</div>
+
+<!-- ══════════════ LOSSES ══════════════ -->
+<div id="losses" class="section">
+  <div class="sec-head"><h2>Loss log</h2><p>Track every loss — patterns reveal where to invest protection</p></div>
+  <div class="card">
+    <div class="card-title"><span class="ico">📝</span> Record a loss</div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="loss-date"></div>
+      <div class="fg"><label class="fl">Bird type</label>
+        <select class="fs" id="loss-type">
+          <option value="chick">Chick</option>
+          <option value="hen">Hen</option>
+          <option value="rooster">Rooster</option>
+        </select>
+      </div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Count</label><input class="fi" type="number" id="loss-count" min="1" value="1"></div>
+      <div class="fg"><label class="fl">Cause</label>
+        <select class="fs" id="loss-cause">
+          <option value="hawk">Hawk</option>
+          <option value="mongoose">Mongoose</option>
+          <option value="dog">Dog</option>
+          <option value="cat">Cat</option>
+          <option value="disease">Disease</option>
+          <option value="eaten">Eaten (family)</option>
+          <option value="unknown">Unknown</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-rust" onclick="logLoss()">Record loss</button>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="ico">⚠️</span> Breakdown by cause</div>
+    <div id="loss-summary"></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="ico">📜</span> Loss history</div>
+    <div id="loss-log"></div>
+  </div>
+</div>
+
+<!-- ══════════════ PROTECTION ══════════════ -->
+<div id="protection" class="section">
+  <div class="sec-head"><h2>Predator protection</h2><p>Practical measures for your homestead</p></div>
+  <div class="tip"><span>📊</span><span>Log losses first — knowing your top predator tells you where to act.</span></div>
+  <div class="prot-card"><div class="prot-head" style="background:var(--warm)"><span style="font-size:20px">🦅</span><h3>Hawk protection</h3></div><div class="prot-body"><ul><li>String wire or fishing line overhead in a grid — hawks won't dive through tight gaps</li><li>Plant dense cover bushes for instant shelter</li><li>Your rooster is a live alarm system for aerial threats</li><li>Restrict free-range to mid-morning; avoid early dawn and dusk</li></ul></div></div>
+  <div class="prot-card"><div class="prot-head" style="background:var(--rust-lt)"><span style="font-size:20px">🦦</span><h3>Mongoose protection</h3></div><div class="prot-body"><ul><li>Hardware cloth buried 30 cm underground around the full coop perimeter</li><li>Lock coop door every night — mongooses hunt at dusk and before dawn</li><li>Automatic timer coop door (₹1,500–3,000) pays for itself fast</li><li>Remove leftover feed from the yard each evening</li></ul></div></div>
+  <div class="prot-card"><div class="prot-head" style="background:var(--green-pale)"><span style="font-size:20px">🐕</span><h3>Dog &amp; cat control</h3></div><div class="prot-body"><ul><li>Solid 4-foot fence with buried wire base keeps strays out</li><li>Keep young chicks in a covered brooder until 4 weeks minimum</li><li>Motion-sensor lights near the coop deter night approaches</li></ul></div></div>
+  <div class="card" style="background:var(--green-pale);border-color:rgba(74,103,65,.2)">
+    <div class="card-title" style="color:var(--green)"><span class="ico">🎯</span> Your business targets</div>
+    <div style="font-size:13px;color:#3a5432;line-height:2.1" id="target-summary"></div>
+  </div>
+</div>
+
+</div><!-- /app -->
+
+<!-- ══════════════ PROMOTE MODAL ══════════════ -->
+<div id="promote-modal" class="modal-backdrop hidden">
+  <div class="modal">
+    <h3>Promote chick to breeder</h3>
+    <p style="font-size:13px;color:var(--text-soft);margin-bottom:1rem">This chick will keep its common ID and receive a new breeder ID + name.</p>
+    <div class="fg"><label class="fl">Chick common ID</label><input class="fi" id="pm-chick-id" readonly style="background:var(--warm)"></div>
+    <div class="fg"><label class="fl">New breeder ID</label><input class="fi" id="pm-breeder-id" placeholder="e.g. H04 or R02"></div>
+    <div class="fg"><label class="fl">Name (given by you)</label><input class="fi" id="pm-name" placeholder="e.g. Priya"></div>
+    <div class="fg"><label class="fl">Role</label>
+      <select class="fs" id="pm-role">
+        <option value="hen">Breeder hen</option>
+        <option value="rooster">Rooster</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closePromoteModal()">Cancel</button>
+      <button class="btn btn-earth" onclick="confirmPromote()">Promote →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────
+const today = new Date().toISOString().split('T')[0];
+document.getElementById('dash-date').textContent =
+  new Date().toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+['egg-date','loss-date','ck-date','sale-date','fu-date'].forEach(id=>{
+  const el=document.getElementById(id); if(el) el.value=today;
+});
+
+const state = {
+  roosters: [
+    {id:'R01',name:'The Rooster',breed:'Country fowl',photo:null,active:true}
+  ],
+  hens: [
+    {id:'H01',name:'Hen A',breed:'',photo:null,totalEggs:0,clutches:0},
+    {id:'H02',name:'Hen B',breed:'',photo:null,totalEggs:0,clutches:0},
+    {id:'H03',name:'Hen C',breed:'',photo:null,totalEggs:0,clutches:0}
+  ],
+  batches: [],
+  // chicks: per batch, {commonId, sold, promoted, dead}
+  eggLog: [],
+  lossLog: [],
+  salesLog: [],
+  feedTypes: [
+    {id:'FT1',name:'Layer Mash',costPerKg:42,unit:'kg'},
+    {id:'FT2',name:'Grain mix',costPerKg:28,unit:'kg'}
+  ],
+  feedUsageLog: [],
+  nextFeedId: 3
+};
+
+// ─── PHOTO HANDLERS ──────────────────────────────────────
+function setHeaderPhoto(inp){
+  if(!inp.files[0])return;
+  const r=new FileReader();
+  r.onload=e=>{
+    const img=document.getElementById('hdr-img');
+    const bg=document.getElementById('hdr-bg');
+    img.src=e.target.result; img.classList.remove('hidden');
+    bg.style.display='none';
+  };
+  r.readAsDataURL(inp.files[0]);
+}
+function triggerBirdPhoto(type,id){
+  document.getElementById(`photo-${type}-${id}`)?.click();
+}
+function setBirdPhoto(type,id,inp){
+  if(!inp.files[0])return;
+  const r=new FileReader();
+  r.onload=e=>{
+    const arr = type==='rooster'?state.roosters:state.hens;
+    const b=arr.find(x=>x.id===id);
+    if(b){b.photo=e.target.result; renderBreeders();}
+  };
+  r.readAsDataURL(inp.files[0]);
+}
+
+// ─── TAB ─────────────────────────────────────────────────
+function switchTab(t){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b=>{
+    if(b.getAttribute('onclick')?.includes(`'${t}'`)) b.classList.add('active');
+  });
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById(t)?.classList.add('active');
+  render();
+}
+
+// ─── RENDER ──────────────────────────────────────────────
+function render(){
+  renderMetrics(); renderActivity(); renderFlockHealth();
+  renderBreeders(); renderEggLog();
+  renderBatches(); renderSales(); renderFeed();
+  renderLosses(); renderTargets(); populateSelects();
+  document.getElementById('potential-eggs').textContent =
+    `${state.hens.length*13*4} eggs`;
+}
+
+function renderMetrics(){
+  const totalEggs = state.eggLog.reduce((s,e)=>s+e.count,0);
+  const totalLosses = state.lossLog.reduce((s,l)=>s+l.count,0);
+  const activeChicks = state.batches.reduce((s,b)=>s+b.chicks.filter(c=>!c.sold&&!c.promoted&&!c.dead).length,0);
+  const totalSales = state.salesLog.reduce((s,sl)=>s+sl.total,0);
+  const totalFeedCost = state.feedUsageLog.reduce((s,fu)=>{
+    const ft=state.feedTypes.find(f=>f.id===fu.feedId);
+    return s+(ft?fu.qty*ft.costPerKg:0);
+  },0);
+  const potential = state.hens.length*13*4;
+  document.getElementById('metrics').innerHTML=`
+    <div class="metric m-egg"><div class="m-icon">🥚</div><div class="m-val">${totalEggs}</div><div class="m-label">Eggs logged</div><div class="m-sub">of ~${potential}/yr</div></div>
+    <div class="metric m-hen"><div class="m-icon">🐔</div><div class="m-val">${state.hens.length+state.roosters.length}</div><div class="m-label">Breeders</div><div class="m-sub">${state.roosters.length} rooster(s) · ${state.hens.length} hen(s)</div></div>
+    <div class="metric m-chick"><div class="m-icon">🐣</div><div class="m-val">${activeChicks}</div><div class="m-label">Active chicks</div><div class="m-sub">${state.batches.length} batch(es)</div></div>
+    <div class="metric m-sales"><div class="m-icon">💰</div><div class="m-val">₹${Math.round(totalSales)}</div><div class="m-label">Total sales</div><div class="m-sub">${state.salesLog.length} transaction(s)</div></div>
+    <div class="metric m-feed"><div class="m-icon">🌾</div><div class="m-val">₹${Math.round(totalFeedCost)}</div><div class="m-label">Feed cost</div><div class="m-sub">${state.feedUsageLog.length} log entries</div></div>
+    <div class="metric m-loss"><div class="m-icon">📉</div><div class="m-val">${totalLosses}</div><div class="m-label">Total losses</div><div class="m-sub">birds lost</div></div>
+  `;
+}
+
+function renderActivity(){
+  const all=[
+    ...state.eggLog.map(e=>({date:e.date,text:`${e.count} egg(s) from ${e.hen} — ${e.purpose}`,type:'green'})),
+    ...state.lossLog.map(l=>({date:l.date,text:`${l.count} ${l.birdType}(s) lost to ${l.cause}`,type:'rust'})),
+    ...state.batches.map(b=>({date:b.date,text:`Batch ${b.batchId}: ${b.chicks.length} chicks (${b.roosterId}×${b.henId})`,type:'earth'})),
+    ...state.salesLog.map(sl=>({date:sl.date,text:`Sold ${sl.ids.length} chick(s) to ${sl.buyer||'buyer'} — ₹${sl.total}`,type:'plum'})),
+    ...state.feedUsageLog.map(fu=>{const ft=state.feedTypes.find(f=>f.id===fu.feedId);return{date:fu.date,text:`${fu.qty} ${ft?.unit||''} ${ft?.name||''} fed`,type:'sky'};})
+  ].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,10);
+  const el=document.getElementById('activity-log');
+  if(!all.length){el.innerHTML='<div class="empty"><div class="empty-ico">📋</div>No activity yet.</div>';return;}
+  el.innerHTML=all.map(a=>`
+    <div class="log-row">
+      <span class="log-main">${a.text}</span>
+      <span class="badge bg-${a.type}" style="flex-shrink:0">${a.type==='green'?'egg':a.type==='rust'?'loss':a.type==='plum'?'sale':a.type==='sky'?'feed':'chick'}</span>
+      <span class="log-meta">${a.date}</span>
+    </div>`).join('');
+}
+
+function renderFlockHealth(){
+  const el=document.getElementById('flock-health');if(!el)return;
+  const totalEggs=state.eggLog.reduce((s,e)=>s+e.count,0);
+  const potential=state.hens.length*52;
+  const pct=potential?Math.min(100,Math.round(totalEggs/potential*100)):0;
+  const losses=state.lossLog.reduce((s,l)=>s+l.count,0);
+  const salesRev=state.salesLog.reduce((s,sl)=>s+sl.total,0);
+  const feedCost=state.feedUsageLog.reduce((s,fu)=>{
+    const ft=state.feedTypes.find(f=>f.id===fu.feedId);
+    return s+(ft?fu.qty*ft.costPerKg:0);
+  },0);
+  el.innerHTML=`
+    <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text-mid);margin-bottom:3px"><span>Egg production rate</span><span style="font-weight:500">${pct}%</span></div>
+    <div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div>
+    <div style="font-size:11.5px;color:var(--text-soft);margin-bottom:14px">${totalEggs} eggs logged · target ~${potential}/year</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+      <div style="text-align:center"><div style="font-size:20px;font-family:'Playfair Display',serif">₹${Math.round(salesRev)}</div><div style="font-size:11px;color:var(--text-soft)">Total sales revenue</div></div>
+      <div style="text-align:center"><div style="font-size:20px;font-family:'Playfair Display',serif">₹${Math.round(feedCost)}</div><div style="font-size:11px;color:var(--text-soft)">Total feed cost</div></div>
+      <div style="text-align:center"><div style="font-size:20px;font-family:'Playfair Display',serif;color:${salesRev-feedCost>=0?'var(--green)':'var(--rust)'}">${salesRev-feedCost>=0?'+':''}₹${Math.round(salesRev-feedCost)}</div><div style="font-size:11px;color:var(--text-soft)">Net (sales − feed)</div></div>
+    </div>
+    <div class="divider"></div>
+    <div style="font-size:13px;color:var(--text-mid)">Losses: <strong style="color:var(--rust)">${losses} birds</strong> &nbsp;·&nbsp; Target: under 15% of annual chick output</div>
+  `;
+}
+
+// ─── BREEDERS ────────────────────────────────────────────
+function renderBreeders(){
+  // file inputs
+  const fi=document.getElementById('bird-file-inputs');
+  fi.innerHTML=[
+    ...state.roosters.map(r=>`<input type="file" id="photo-rooster-${r.id}" class="hidden" accept="image/*" onchange="setBirdPhoto('rooster','${r.id}',this)">`),
+    ...state.hens.map(h=>`<input type="file" id="photo-hen-${h.id}" class="hidden" accept="image/*" onchange="setBirdPhoto('hen','${h.id}',this)">`)
+  ].join('');
+
+  // roosters
+  const rl=document.getElementById('rooster-list');
+  if(rl) rl.innerHTML=state.roosters.map(r=>birdCardHTML('rooster',r,'🐓')).join('');
+
+  // hens
+  const hl=document.getElementById('hen-list');
+  if(hl) hl.innerHTML=state.hens.map(h=>birdCardHTML('hen',h,'🐔')).join('');
+}
+
+function birdCardHTML(type,b,ico){
+  const totalEggs=type==='hen'?(b.totalEggs||0):null;
+  const pct=type==='hen'?Math.min(100,Math.round((b.totalEggs||0)/52*100)):0;
+  const photo=b.photo
+    ?`<img src="${b.photo}" alt="${b.name}">`
+    :`<div class="bird-photo-ph"><div class="ph-ico">${ico}</div><div>Tap to add photo</div></div>`;
+  return `<div class="bird-card">
+    <div class="bird-photo" onclick="triggerBirdPhoto('${type}','${b.id}')">
+      ${photo}<div class="photo-hover">${b.photo?'Change photo':'Add photo'}</div>
+    </div>
+    <div class="bird-body">
+      <div class="bird-name">${b.name}</div>
+      <div class="bird-id">${b.id}</div>
+      <div class="bird-stats">${b.breed||'Breed unknown'}${type==='hen'?` · ${totalEggs} eggs`:''}</div>
+      ${type==='hen'?`<div class="bird-bar"><div class="bird-bar-fill" style="width:${pct}%"></div></div>`:''}
+      <div class="bird-status">${type==='rooster'?'Active rooster':'Active breeder'}</div>
+    </div>
+  </div>`;
+}
+
+function addRooster(){
+  const bid=document.getElementById('r-bid').value.trim();
+  const name=document.getElementById('r-name').value.trim();
+  const breed=document.getElementById('r-breed').value.trim();
+  if(!bid||!name){alert('Please enter a breeder ID and name.');return;}
+  if(state.roosters.find(r=>r.id===bid)){alert('Breeder ID already exists.');return;}
+  state.roosters.push({id:bid,name,breed,photo:null,active:true});
+  document.getElementById('r-bid').value='';
+  document.getElementById('r-name').value='';
+  document.getElementById('r-breed').value='';
+  render();
+}
+
+function addHen(){
+  const bid=document.getElementById('h-bid').value.trim();
+  const name=document.getElementById('h-name').value.trim();
+  const breed=document.getElementById('h-breed').value.trim();
+  if(!bid||!name){alert('Please enter a breeder ID and name.');return;}
+  if(state.hens.find(h=>h.id===bid)){alert('Breeder ID already exists.');return;}
+  state.hens.push({id:bid,name,breed,photo:null,totalEggs:0,clutches:0});
+  document.getElementById('h-bid').value='';
+  document.getElementById('h-name').value='';
+  document.getElementById('h-breed').value='';
+  render();
+}
+
+// ─── EGGS ────────────────────────────────────────────────
+function renderEggLog(){
+  const el=document.getElementById('egg-log-list');if(!el)return;
+  if(!state.eggLog.length){el.innerHTML='<div class="empty"><div class="empty-ico">🥚</div>No eggs logged yet.</div>';return;}
+  el.innerHTML=[...state.eggLog].reverse().map(e=>`
+    <div class="log-row">
+      <span class="log-main">${e.hen}</span>
+      <span>${e.count} egg${e.count>1?'s':''}</span>
+      <span class="badge ${e.purpose==='hatching'?'bg-earth':e.purpose==='eating'?'bg-green':'bg-gold'}">${e.purpose}</span>
+      <span class="log-meta">${e.date}</span>
+    </div>`).join('');
+}
+
+function logEgg(){
+  const date=document.getElementById('egg-date').value;
+  const hen=document.getElementById('egg-hen').value;
+  const count=parseInt(document.getElementById('egg-count').value)||0;
+  const purpose=document.getElementById('egg-purpose').value;
+  if(!date||!hen||count<1)return;
+  state.eggLog.push({date,hen,count,purpose});
+  const h=state.hens.find(x=>x.name===hen);
+  if(h){h.totalEggs+=count;if(count>=12)h.clutches++;}
+  render();
+  document.getElementById('egg-count').value=1;
+}
+
+// ─── BATCHES / CHICKS ────────────────────────────────────
+function addBatch(){
+  const date=document.getElementById('ck-date').value;
+  const batchId=document.getElementById('ck-bid').value.trim();
+  const roosterId=document.getElementById('ck-rooster').value;
+  const henId=document.getElementById('ck-hen').value;
+  const count=parseInt(document.getElementById('ck-count').value)||0;
+  if(!date||!batchId||!roosterId||!henId||count<1){alert('Please fill all batch fields.');return;}
+  if(state.batches.find(b=>b.batchId===batchId)){alert('Batch ID already exists.');return;}
+
+  const chicks=[];
+  for(let i=1;i<=count;i++){
+    chicks.push({commonId:`${roosterId}-${henId}-${batchId}-${i}`,sold:false,promoted:false,dead:false,promotedBreederId:null,promotedName:null});
+  }
+  state.batches.push({batchId,date,roosterId,henId,chicks});
+  document.getElementById('ck-bid').value='';
+  document.getElementById('ck-count').value=8;
+  render();
+}
+
+function renderBatches(){
+  const el=document.getElementById('batch-list');if(!el)return;
+  if(!state.batches.length){el.innerHTML='<div class="card"><div class="empty"><div class="empty-ico">🐣</div>No batches yet.</div></div>';return;}
+  const stageOf=weeks=>{
+    if(weeks<4)return{label:'Brooder',cls:'bg-earth'};
+    if(weeks<8)return{label:'Young chick',cls:'bg-gold'};
+    if(weeks<16)return{label:'Pullet/cockerel',cls:'bg-rust'};
+    if(weeks<20)return{label:'Near laying',cls:'bg-green'};
+    return{label:'Adult',cls:'bg-green'};
+  };
+  el.innerHTML=[...state.batches].reverse().map(b=>{
+    const weeks=Math.floor((Date.now()-new Date(b.date))/(7*24*3600*1000));
+    const {label,cls}=stageOf(weeks);
+    const active=b.chicks.filter(c=>!c.sold&&!c.promoted&&!c.dead).length;
+    const sold=b.chicks.filter(c=>c.sold).length;
+    const promoted=b.chicks.filter(c=>c.promoted).length;
+    return `<div class="batch-card">
+      <div class="batch-head">
+        <div>
+          <div class="batch-title">Batch ${b.batchId} &nbsp;·&nbsp; ${b.roosterId} × ${b.henId}</div>
+          <div class="batch-meta">${b.date} · ${weeks} wk${weeks!==1?'s':''} old</div>
+          <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">
+            <span class="badge ${cls}">${label}</span>
+            <span class="badge bg-green">${active} active</span>
+            ${sold?`<span class="badge bg-plum">${sold} sold</span>`:''}
+            ${promoted?`<span class="badge bg-sky">${promoted} promoted</span>`:''}
+          </div>
+        </div>
+      </div>
+      <div class="chick-roster">
+        ${b.chicks.map(c=>{
+          let cls2='bg-earth',extra='';
+          if(c.sold){cls2='bg-plum';extra=' (sold)';}
+          else if(c.promoted){cls2='bg-sky';extra=` → ${c.promotedBreederId}`;}
+          else if(c.dead){cls2='bg-rust';extra=' (×)';}
+          return `<span class="chick-id" style="cursor:${!c.sold&&!c.promoted&&!c.dead?'pointer':'default'};opacity:${c.sold||c.dead?0.55:1}"
+            onclick="${!c.sold&&!c.promoted&&!c.dead?`openPromoteModal('${c.commonId}')`:'void 0'}"
+            title="${!c.sold&&!c.promoted&&!c.dead?'Click to promote to breeder':c.sold?'Sold':c.promoted?'Promoted to breeder':'Deceased'}"
+          >${c.commonId}${extra}</span>`;
+        }).join('')}
+      </div>
+      <div style="font-size:11.5px;color:var(--text-soft);margin-top:8px">Click any active chick ID to promote it to a breeder.</div>
+    </div>`;
+  }).join('');
+}
+
+// ─── PROMOTE MODAL ───────────────────────────────────────
+let promoteTarget=null;
+function openPromoteModal(commonId){
+  promoteTarget=commonId;
+  document.getElementById('pm-chick-id').value=commonId;
+  document.getElementById('pm-breeder-id').value='';
+  document.getElementById('pm-name').value='';
+  document.getElementById('promote-modal').classList.remove('hidden');
+}
+function closePromoteModal(){
+  document.getElementById('promote-modal').classList.add('hidden');
+  promoteTarget=null;
+}
+function confirmPromote(){
+  const breederId=document.getElementById('pm-breeder-id').value.trim();
+  const name=document.getElementById('pm-name').value.trim();
+  const role=document.getElementById('pm-role').value;
+  if(!breederId||!name){alert('Please enter a breeder ID and name.');return;}
+  const allBids=[...state.roosters.map(r=>r.id),...state.hens.map(h=>h.id)];
+  if(allBids.includes(breederId)){alert('Breeder ID already exists.');return;}
+  // find chick
+  let found=false;
+  for(const b of state.batches){
+    const c=b.chicks.find(x=>x.commonId===promoteTarget);
+    if(c){
+      c.promoted=true;
+      c.promotedBreederId=breederId;
+      c.promotedName=name;
+      found=true;
+      // add to breeders
+      if(role==='rooster'){
+        state.roosters.push({id:breederId,name,breed:`Promoted from ${promoteTarget}`,photo:null,active:true,commonId:promoteTarget});
+      } else {
+        state.hens.push({id:breederId,name,breed:`Promoted from ${promoteTarget}`,photo:null,totalEggs:0,clutches:0,commonId:promoteTarget});
+      }
+      break;
+    }
+  }
+  if(!found){alert('Chick not found.');return;}
+  closePromoteModal();
+  render();
+}
+
+// ─── SALES ───────────────────────────────────────────────
+function logSale(){
+  const errEl=document.getElementById('sale-error');
+  errEl.style.display='none';
+  const date=document.getElementById('sale-date').value;
+  const buyer=document.getElementById('sale-buyer').value.trim();
+  const idsRaw=document.getElementById('sale-ids').value.trim();
+  const price=parseFloat(document.getElementById('sale-price').value)||0;
+  const notes=document.getElementById('sale-notes').value.trim();
+  if(!date||!idsRaw){errEl.textContent='Date and chick IDs are required.';errEl.style.display='block';return;}
+
+  const ids=idsRaw.split(',').map(s=>s.trim()).filter(Boolean);
+  const errors=[];
+  for(const id of ids){
+    let found=false;
+    for(const b of state.batches){
+      const c=b.chicks.find(x=>x.commonId===id);
+      if(c){
+        if(c.sold){errors.push(`${id} is already sold.`);}
+        else if(c.promoted){errors.push(`${id} has been promoted to a breeder.`);}
+        else if(c.dead){errors.push(`${id} is recorded as dead.`);}
+        else found=true;
+        break;
+      }
+    }
+    if(!found&&!errors.find(e=>e.startsWith(id))){errors.push(`${id} not found in any batch.`);}
+  }
+  if(errors.length){errEl.innerHTML=errors.join('<br>');errEl.style.display='block';return;}
+
+  // mark sold
+  for(const id of ids){
+    for(const b of state.batches){
+      const c=b.chicks.find(x=>x.commonId===id);
+      if(c){c.sold=true;break;}
+    }
+  }
+  state.salesLog.push({date,buyer:buyer||'—',ids,priceEach:price,total:ids.length*price,notes});
+  document.getElementById('sale-ids').value='';
+  document.getElementById('sale-buyer').value='';
+  document.getElementById('sale-notes').value='';
+  render();
+}
+
+function renderSales(){
+  const sm=document.getElementById('sales-summary');
+  const sr=document.getElementById('sale-records');
+  if(!sm||!sr)return;
+  const totalRev=state.salesLog.reduce((s,sl)=>s+sl.total,0);
+  const totalSold=state.salesLog.reduce((s,sl)=>s+sl.ids.length,0);
+  if(!state.salesLog.length){
+    sm.innerHTML='<div class="empty"><div class="empty-ico">💰</div>No sales recorded.</div>';
+    sr.innerHTML='';return;
+  }
+  sm.innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:.5rem">
+      <div style="text-align:center"><div style="font-size:22px;font-family:'Playfair Display',serif">₹${Math.round(totalRev)}</div><div style="font-size:11px;color:var(--text-soft)">Total revenue</div></div>
+      <div style="text-align:center"><div style="font-size:22px;font-family:'Playfair Display',serif">${totalSold}</div><div style="font-size:11px;color:var(--text-soft)">Birds sold</div></div>
+      <div style="text-align:center"><div style="font-size:22px;font-family:'Playfair Display',serif">${state.salesLog.length}</div><div style="font-size:11px;color:var(--text-soft)">Transactions</div></div>
+    </div>`;
+  sr.innerHTML=[...state.salesLog].reverse().map(sl=>`
+    <div class="sale-row">
+      <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:5px">
+        <span style="font-weight:500">${sl.buyer}</span>
+        <span class="badge bg-plum">₹${sl.total} · ${sl.ids.length} bird${sl.ids.length>1?'s':''}</span>
+        <span class="log-meta">${sl.date}</span>
+      </div>
+      ${sl.notes?`<div style="font-size:12px;color:var(--text-soft);margin-top:4px">${sl.notes}</div>`:''}
+      <div class="sale-ids">${sl.ids.map(id=>`<span class="chick-id">${id}</span>`).join('')}</div>
+    </div>`).join('');
+}
+
+// ─── FEED ────────────────────────────────────────────────
+function addFeedType(){
+  const name=document.getElementById('ft-name').value.trim();
+  const cost=parseFloat(document.getElementById('ft-cost').value)||0;
+  const unit=document.getElementById('ft-unit').value;
+  if(!name){alert('Please enter a feed name.');return;}
+  state.feedTypes.push({id:'FT'+state.nextFeedId++,name,costPerKg:cost,unit});
+  document.getElementById('ft-name').value='';
+  document.getElementById('ft-cost').value=40;
+  render();
+}
+
+function logFeedUsage(){
+  const date=document.getElementById('fu-date').value;
+  const feedId=document.getElementById('fu-type').value;
+  const qty=parseFloat(document.getElementById('fu-qty').value)||0;
+  const notes=document.getElementById('fu-notes').value.trim();
+  if(!date||!feedId||qty<=0)return;
+  state.feedUsageLog.push({date,feedId,qty,notes});
+  document.getElementById('fu-qty').value=1;
+  document.getElementById('fu-notes').value='';
+  render();
+}
+
+function renderFeed(){
+  // feed type list
+  const ftl=document.getElementById('feed-type-list');
+  if(ftl){
+    if(!state.feedTypes.length){ftl.innerHTML='<div class="empty"><div class="empty-ico">🌾</div>No feed types added.</div>';}
+    else ftl.innerHTML=state.feedTypes.map(ft=>`
+      <div class="feed-item">
+        <div><div class="feed-name">${ft.name}</div><div class="feed-meta">₹${ft.costPerKg} per ${ft.unit}</div></div>
+        <span class="badge bg-sky">${ft.unit}</span>
+      </div>`).join('');
+  }
+  // feed type select
+  const fts=document.getElementById('fu-type');
+  if(fts) fts.innerHTML=state.feedTypes.map(ft=>`<option value="${ft.id}">${ft.name}</option>`).join('');
+
+  // summary
+  const fs=document.getElementById('feed-summary');
+  if(fs){
+    if(!state.feedUsageLog.length){fs.innerHTML='<div class="empty"><div class="empty-ico">📊</div>No usage logged yet.</div>';}
+    else{
+      const byFeed={};
+      state.feedUsageLog.forEach(fu=>{
+        if(!byFeed[fu.feedId])byFeed[fu.feedId]={qty:0,cost:0};
+        const ft=state.feedTypes.find(f=>f.id===fu.feedId);
+        byFeed[fu.feedId].qty+=fu.qty;
+        byFeed[fu.feedId].cost+=fu.qty*(ft?.costPerKg||0);
+      });
+      // daily avg (last 7 days)
+      const last7=state.feedUsageLog.filter(fu=>{
+        const d=new Date(fu.date); const now=new Date();
+        return (now-d)/(1000*86400)<=7;
+      });
+      const daily7=last7.reduce((s,fu)=>s+fu.qty,0)/7;
+      fs.innerHTML=`
+        <div style="margin-bottom:14px;padding:12px 14px;background:var(--green-pale);border-radius:11px;border:1px solid rgba(74,103,65,.18)">
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-soft);margin-bottom:3px">7-day average daily usage</div>
+          <div style="font-size:22px;font-family:'Playfair Display',serif;color:var(--green)">${daily7.toFixed(2)} units/day</div>
+        </div>
+        ${Object.entries(byFeed).map(([fid,v])=>{
+          const ft=state.feedTypes.find(f=>f.id===fid);
+          return `<div class="log-row"><span class="log-main">${ft?.name||fid}</span><span>${v.qty.toFixed(2)} ${ft?.unit||''}</span><span class="badge bg-sky">₹${Math.round(v.cost)}</span></div>`;
+        }).join('')}`;
+    }
+  }
+
+  // usage log
+  const fl=document.getElementById('feed-log');
+  if(fl){
+    if(!state.feedUsageLog.length){fl.innerHTML='<div class="empty"><div class="empty-ico">📋</div>No usage logged.</div>';}
+    else fl.innerHTML=[...state.feedUsageLog].reverse().map(fu=>{
+      const ft=state.feedTypes.find(f=>f.id===fu.feedId);
+      const cost=(ft?fu.qty*ft.costPerKg:0);
+      return `<div class="log-row">
+        <span class="log-main">${ft?.name||fu.feedId}</span>
+        <span>${fu.qty} ${ft?.unit||''}</span>
+        <span class="badge bg-sky">₹${Math.round(cost)}</span>
+        ${fu.notes?`<span class="log-meta">${fu.notes}</span>`:''}
+        <span class="log-meta">${fu.date}</span>
+      </div>`;
+    }).join('');
+  }
+}
+
+// ─── LOSSES ──────────────────────────────────────────────
+function logLoss(){
+  const date=document.getElementById('loss-date').value;
+  const birdType=document.getElementById('loss-type').value;
+  const count=parseInt(document.getElementById('loss-count').value)||1;
+  const cause=document.getElementById('loss-cause').value;
+  if(!date)return;
+  state.lossLog.push({date,birdType,count,cause});
+  // mark chick as dead if applicable (best-effort — user should note which)
+  render();
+  document.getElementById('loss-count').value=1;
+}
+
+function renderLosses(){
+  const ls=document.getElementById('loss-summary');
+  const ll=document.getElementById('loss-log');
+  if(!ls||!ll)return;
+  if(!state.lossLog.length){
+    ls.innerHTML='<div class="empty"><div class="empty-ico">✅</div>No losses recorded!</div>';
+    ll.innerHTML='';return;
+  }
+  const causes={};
+  state.lossLog.forEach(l=>{causes[l.cause]=(causes[l.cause]||0)+l.count});
+  const max=Math.max(...Object.values(causes));
+  ls.innerHTML=Object.entries(causes).sort((a,b)=>b[1]-a[1]).map(([c,n])=>`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <span style="font-size:13px;min-width:85px;text-transform:capitalize;color:var(--text-mid)">${c}</span>
+      <div style="flex:1;height:7px;background:var(--warm);border-radius:3px;overflow:hidden"><div style="height:100%;border-radius:3px;background:var(--rust);width:${Math.round(n/max*100)}%"></div></div>
+      <span style="font-size:12px;color:var(--text-soft);min-width:24px;text-align:right">${n}</span>
+    </div>`).join('');
+  ll.innerHTML=[...state.lossLog].reverse().map(l=>`
+    <div class="log-row">
+      <span class="log-main" style="text-transform:capitalize">${l.birdType}</span>
+      <span>${l.count} bird${l.count>1?'s':''}</span>
+      <span class="badge bg-rust">${l.cause}</span>
+      <span class="log-meta">${l.date}</span>
+    </div>`).join('');
+}
+
+// ─── TARGETS ─────────────────────────────────────────────
+function renderTargets(){
+  const el=document.getElementById('target-summary');if(!el)return;
+  el.innerHTML=`
+    <div>${state.hens.length} hens × 13 eggs × 4 clutches = <strong>${state.hens.length*13*4} eggs / year potential</strong></div>
+    <div>Target loss rate: under 15% of chicks, 0% of breeder hens</div>
+    <div>Keep ≥ 50% of chick batches as future layers or breeders</div>
+    <div>Cull or eat surplus cockerels at 16–20 weeks</div>
+    <div>Retire a breeder hen after 2–3 productive laying seasons</div>`;
+}
+
+// ─── SELECTS ─────────────────────────────────────────────
+function populateSelects(){
+  const eggHen=document.getElementById('egg-hen');
+  if(eggHen) eggHen.innerHTML=state.hens.map(h=>`<option value="${h.name}">${h.name} (${h.id})</option>`).join('');
+  const ckR=document.getElementById('ck-rooster');
+  if(ckR) ckR.innerHTML=state.roosters.map(r=>`<option value="${r.id}">${r.name} (${r.id})</option>`).join('');
+  const ckH=document.getElementById('ck-hen');
+  if(ckH) ckH.innerHTML=state.hens.map(h=>`<option value="${h.id}">${h.name} (${h.id})</option>`).join('');
+}
+
+render();
+</script>
+</body>
+</html>
